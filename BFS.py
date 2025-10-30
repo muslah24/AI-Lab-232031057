@@ -1,17 +1,22 @@
 from collections import deque
-def bfs(graph,start,goal):
-    frontier=deque([start])
-    parent={start:None}
-    while frontier:
-        node=frontier.popleft()
-        if node==goal:
-            path=[]
-            while node is not None:
-                path.append(node)
-                node=parent[node]
-            return path[::-1]
-        for n in graph.get(node,[]):
-            if n not in parent:
-                parent[n]=node
-                frontier.append(n)
+
+def bfs(graph, start, goal):
+    queue = deque([start])
+    visited = {start: None}
+  
+    while queue:
+        current = queue.popleft()
+        
+        if current == goal:
+            path = []
+            while current is not None:
+                path.insert(0, current)
+                current = visited[current]
+            return path
+        
+        for neighbor in graph.get(current, []):
+            if neighbor not in visited:
+                visited[neighbor] = current
+                queue.append(neighbor)
+    
     return None
