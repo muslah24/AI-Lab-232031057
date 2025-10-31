@@ -1,0 +1,75 @@
+# N_queens.py
+# Two implementations: simple backtracking (row-by-row) and a fast bitmask solver that enumerates all solutions.
+
+def solve_n_queens_backtracking(n, find_all=False):
+    solutions = []
+    cols = set()
+    diag1 = set()  # r - c
+    diag2 = set()  # r + c
+    board = [-1] * n
+
+    def place(row):
+        if row == n:
+            # format solution as list of column indices or as board strings
+            sol = list(board)
+            solutions.append(sol)
+            return not find_all  # if we only want one, stop (return True indicates stop)
+        for c in range(n):
+            if c in cols or (row - c) in diag1 or (row + c) in diag2:
+                continue
+            cols.add(c); diag1.add(row - c); diag2.add(row + c)
+            board[row] = c
+            stop = place(row + 1)
+            if stop:
+                return True
+            cols.remove(c); diag1.remove(row - c); diag2.remove(row + c)
+            board[row] = -1
+        return False
+
+    place(0)
+    return solutions
+
+# Fast bitmask solver (will return count of solutions or the first solution)
+def solve_n_queens_bitmask(n, find_all=False):
+    solutions = []
+    def backtrack(ld, cols, rd, row_arr):
+        # ld: columns under attack from left diagonals
+        # cols: columns occupied
+        # rd: right diagonals
+        if cols == (1 << n) - 1:
+            solutions.append(list(row_arr))
+            return not find_all
+        # positions free (0 bits are free)
+        free = (~(ld | cols | rd)) & ((1 << n) - 1)
+        while free:
+            # pick the rightmost free bit
+            p = free & -free
+            free -= p
+            col_index = (p.bit_length() - 1)
+            row_arr.append(col_index)
+            stop = backtrack((ld | p) << 1, cols | p, (rd | p) >> 1, row_arr)
+            if stop:
+                return True
+            row_arr.pop()
+        return False
+
+    backtrack(0, 0, 0, [])
+    return solutions
+
+if __name__ == "__main__":
+    n = 8
+    print(f"Finding one solution for {n}-Queens (simple backtracking):")
+    sols = solve_n_queens_backtracking(n, find_all=False)
+    if sols:
+        s = sols[0]
+        for r, c in enumerate(s):
+            row = ['.'] * n
+            row[c] = 'Q'
+            print(''.join(row))
+    else:
+        print("No solution found.")
+
+    # Count all solutions for a given n (be careful: exponential)
+    print("\nCounting all solutions (fast bitmask) for n=8:")
+    all_sols = solve_n_queens_bitmask(8, find_all=True)
+    print("Number of solutions found:", len(all_sols))
