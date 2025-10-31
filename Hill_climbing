@@ -1,0 +1,28 @@
+def hill_climbing(graph, start, goal, heuristic):
+    current = start
+    path = [current]
+    
+    while current != goal:
+        neighbors = graph.get(current, [])
+        if not neighbors:
+            return None
+        
+        # Choose neighbor with lowest heuristic value
+        next_node = min(neighbors, key=lambda n: heuristic[n])
+        
+        if heuristic[next_node] >= heuristic[current]:
+            return path  # local maximum reached
+        
+        current = next_node
+        path.append(current)
+    return path
+graph = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': ['F'],
+    'D': [],
+    'E': [],
+    'F': []
+}
+h = {'A': 7, 'B': 6, 'C': 3, 'D': 5, 'E': 0, 'F': 4}
+print(hill_climbing(graph, 'A', 'E', h))
